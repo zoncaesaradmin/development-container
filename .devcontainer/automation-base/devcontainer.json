@@ -1,0 +1,27 @@
+{
+  "name": "automation-dev",
+  "build": {
+    "context": "../..",
+    "dockerfile": "../../Containerfile.dev"
+  },
+  "runArgs": [
+    "--privileged",
+    "--device=/dev/fuse"
+  ],
+  "containerEnv": {
+    "BUILDAH_ISOLATION": "chroot",
+    "STORAGE_DRIVER": "vfs",
+    "XDG_RUNTIME_DIR": "/run/user/1000"
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-python.python",
+        "ms-azuretools.vscode-containers"
+      ]
+    }
+  },
+  "postCreateCommand": "go version && python3 --version && podman --version && buildah --version && skopeo --version"
+}
