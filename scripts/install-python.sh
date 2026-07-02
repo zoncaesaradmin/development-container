@@ -3,7 +3,6 @@
 set -euo pipefail
 
 packages=(
-    pipx
     python3
     python3-dev
     python3-pip
@@ -22,4 +21,3 @@ cat > /etc/profile.d/python.sh <<EOF
 export PIP_DISABLE_PIP_VERSION_CHECK=1
 export PIP_ROOT_USER_ACTION=ignore
 EOF
-

@@ -6,8 +6,8 @@ ARG USER_UID=1000
 ARG USER_GID=1000
 
 ENV DEBIAN_FRONTEND=noninteractive
-ENV LANG=en_US.UTF-8
-ENV LC_ALL=en_US.UTF-8
+ENV LANG=C.UTF-8
+ENV LC_ALL=C.UTF-8
 ENV USERNAME=${USERNAME}
 ENV USER_HOME=/home/${USERNAME}
 ENV XDG_RUNTIME_DIR=/run/user/${USER_UID}
@@ -24,4 +24,3 @@ RUN chmod +x /tmp/scripts/install-common.sh /tmp/scripts/cleanup.sh \
 
 USER ${USERNAME}
 WORKDIR /workspaces
-

@@ -1,17 +1,26 @@
 {
-    "image": "mcr.microsoft.com/devcontainers/javascript-node:3-22",
-    "features": {
-        "ghcr.io/devcontainers/features/docker-in-docker:2": {},
-        "ghcr.io/devcontainers/features/azure-cli:1": {}
-    },
-    "postCreateCommand": "sudo corepack enable && corepack prepare yarn@4.9.4 --activate && npm install -g @devcontainers/cli",
-    "customizations": {
-        "vscode": {
-            "extensions": [
-                "mads-hartmann.bash-ide-vscode",
-                "dbaeumer.vscode-eslint",
-                "EditorConfig.EditorConfig"
-            ]
-        }
+  "name": "automation-dev",
+  "build": {
+    "context": "..",
+    "dockerfile": "../Containerfile.dev"
+  },
+  "runArgs": [
+    "--privileged",
+    "--device=/dev/fuse"
+  ],
+  "containerEnv": {
+    "BUILDAH_ISOLATION": "chroot",
+    "STORAGE_DRIVER": "vfs",
+    "XDG_RUNTIME_DIR": "/run/user/1000"
+  },
+  "remoteUser": "vscode",
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "golang.go",
+        "ms-python.python"
+      ]
     }
+  },
+  "postCreateCommand": "go version && python3 --version && podman --version && buildah --version && skopeo --version"
 }

@@ -8,25 +8,17 @@ USER_GID="${USER_GID:-1000}"
 USER_HOME="/home/${USERNAME}"
 
 packages=(
-    apt-utils
     bash
     build-essential
     buildah
     ca-certificates
     curl
-    dbus-user-session
-    dirmngr
     fuse-overlayfs
     git
     gnupg2
     iproute2
-    iptables
     jq
     less
-    locales
-    lsb-release
-    make
-    nano
     openssh-client
     pkg-config
     podman
@@ -41,22 +33,18 @@ packages=(
     wget
     xz-utils
     zip
-    zsh
 )
 
 apt-get update
 apt-get upgrade -y
 apt-get install -y --no-install-recommends "${packages[@]}"
 
-echo "en_US.UTF-8 UTF-8" > /etc/locale.gen
-locale-gen
-
 if ! getent group "${USERNAME}" >/dev/null 2>&1; then
     groupadd --gid "${USER_GID}" "${USERNAME}"
 fi
 
 if ! id -u "${USERNAME}" >/dev/null 2>&1; then
-    useradd --uid "${USER_UID}" --gid "${USER_GID}" -m -s /bin/zsh "${USERNAME}"
+    useradd --uid "${USER_UID}" --gid "${USER_GID}" -m -s /bin/bash "${USERNAME}"
 fi
 
 usermod -aG sudo "${USERNAME}"
@@ -95,4 +83,3 @@ export STORAGE_DRIVER=vfs
 EOF
 
 chown -R "${USERNAME}:${USERNAME}" "${USER_HOME}" "/run/user/${USER_UID}"
-

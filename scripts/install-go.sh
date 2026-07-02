@@ -4,8 +4,12 @@ set -euo pipefail
 
 USERNAME="${USERNAME:-vscode}"
 GO_VERSION="${GO_VERSION:-1.26.0}"
-TARGETARCH="${TARGETARCH:-amd64}"
+TARGETARCH="${TARGETARCH:-}"
 USER_HOME="/home/${USERNAME}"
+
+if [ -z "${TARGETARCH}" ]; then
+    TARGETARCH="$(dpkg --print-architecture)"
+fi
 
 case "${TARGETARCH}" in
     amd64|x86_64)
@@ -36,4 +40,3 @@ export PATH=\${GOROOT}/bin:\${GOPATH}/bin:\${PATH}
 EOF
 
 chown -R "${USERNAME}:${USERNAME}" "${USER_HOME}/go" "${USER_HOME}/.cache"
-

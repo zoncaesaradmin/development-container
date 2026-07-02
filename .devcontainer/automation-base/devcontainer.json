@@ -18,8 +18,7 @@
     "vscode": {
       "extensions": [
         "golang.go",
-        "ms-python.python",
-        "ms-azuretools.vscode-containers"
+        "ms-python.python"
       ]
     }
   },
