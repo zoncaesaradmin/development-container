@@ -100,6 +100,68 @@ You can override the tag:
 make TAG=dev build-all
 ```
 
+## Publishing images to a registry
+
+After building locally, the `automation-dev` image can be published to a container registry so other build machines can pull it instead of rebuilding.
+
+Publishing is intentionally split from building:
+
+- `build-dev` only produces the local image (`localhost/automation-dev:$(TAG)`).
+- `tag-dev` / `push-dev` / `publish` reuse that already-built local image — they never trigger a rebuild.
+- `release` is a convenience target that does both: `build-dev` then `publish`.
+
+### Registry configuration (Makefile variables)
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `REGISTRY` | `ghcr.io` | Registry hostname. **This is the only variable you change to migrate to a different registry** (e.g. a future internal Zot server). |
+| `IMAGE_OWNER` | `zoncaesaradmin` | GitHub org/user (or registry namespace) that owns the image. |
+| `IMAGE_REPO` | `development-container` | Repository name, used as part of the image path. |
+| `IMAGE_NAME` | `automation-dev` | Image name. |
+| `VERSION` | current `git describe` (falls back to `dev`) | Immutable version tag pushed alongside `latest`. Override for a real release: `make VERSION=v0.1.0 publish`. |
+
+These combine into `REMOTE_IMAGE = $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)`, currently:
+
+```text
+ghcr.io/zoncaesaradmin/development-container/automation-dev
+```
+
+When the future local/Zot registry is ready, publishing to it requires changing only `REGISTRY` (e.g. `make REGISTRY=registry.zon.local/dev publish`) — no other target or logic changes.
+
+### Authenticating to GHCR
+
+Publishing needs a GitHub Personal Access Token with `write:packages` and `read:packages` scopes. **Never commit the token** — pass it via environment variables only:
+
+```bash
+export REGISTRY_USER=<your-github-username>
+export REGISTRY_TOKEN=<your-personal-access-token>
+make login
+```
+
+For what exactly to set `REGISTRY_USER` / `REGISTRY_TOKEN` to for an individual GitHub user vs. CI (GitHub Actions), including token creation steps, see [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
+
+`make login` fails fast with a clear error if either variable is missing, rather than silently no-op'ing.
+
+### Publishing a build
+
+Build first, then publish the already-built image (recommended — lets you validate with `make test-dev` before publishing):
+
+```bash
+make build-dev
+make test-dev
+make VERSION=v0.1.0 publish
+```
+
+This tags and pushes both `ghcr.io/zoncaesaradmin/development-container/automation-dev:v0.1.0` and `...:latest`. The push fails (and stops the build) if either push fails, since `make` aborts on the first non-zero exit code.
+
+Or do both in one step:
+
+```bash
+make VERSION=v0.1.0 release
+```
+
+If `VERSION` is omitted, it defaults to the current `git describe` output (e.g. a commit-based tag), so every build is still traceable even without an explicit version — but for real releases, set `VERSION` explicitly to a semantic tag.
+
 ## Dev container config
 
 A ready-to-use dev container definition for the combined image lives at:
