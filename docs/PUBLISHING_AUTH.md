@@ -7,7 +7,8 @@ The `make login`, `make publish`, and `make release` targets (see [Makefile](../
 
 These are never hardcoded or committed to the repo — they must always be supplied via the environment (or CI secrets). What to set them to depends on who/what is publishing.
 
-For a LAN / internal OCI registry, use the same variables (`REGISTRY`, `IMAGE_OWNER=`, `REGISTRY_USER`, `REGISTRY_TOKEN`) and either `make login-lan` / `make publish-lan` or plain `make login publish`. Token format depends on that registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
+For a LAN / internal OCI registry, use the same `login` / `publish` / `release` targets with `REGISTRY=<lan-host>`, empty `IMAGE_OWNER`, and that registry's `REGISTRY_USER` / `REGISTRY_TOKEN`. Token format depends on the registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
+
 
 ## Individual GitHub user (manual/local publish)
 
@@ -24,7 +25,9 @@ For a LAN / internal OCI registry, use the same variables (`REGISTRY`, `IMAGE_OW
 ### Using it
 
 ```bash
+export REGISTRY=ghcr.io
 export REGISTRY_USER=zoncaesaradmin
+export IMAGE_OWNER=$REGISTRY_USER
 export REGISTRY_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 make login
 ```
@@ -59,6 +62,8 @@ jobs:
       contents: read
       packages: write
     env:
+      REGISTRY: ghcr.io
+      IMAGE_OWNER: ${{ github.actor }}
       REGISTRY_USER: ${{ github.actor }}
       REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -85,4 +90,4 @@ Only if the image must be published to a package under a **different** repo or o
 
 ## Future registry migration
 
-Per the "Publishing images to a registry" section of the README, migrating away from GHCR to a future internal registry (e.g. a Zot server) is expected to only require changing the `REGISTRY` Makefile variable. The `REGISTRY_USER` / `REGISTRY_TOKEN` contract stays the same shape — only what you populate them with changes (e.g. an internal registry might use a service-account username and a long-lived internal token instead of a GitHub PAT). No target or script logic should need to change.
+Changing destination is only env values (`REGISTRY`, `IMAGE_OWNER`, credentials). Same `login` / `publish` / `release` targets. The `REGISTRY_USER` / `REGISTRY_TOKEN` contract stays the same shape (GitHub PAT vs LAN registry token).

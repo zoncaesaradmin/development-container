@@ -102,95 +102,56 @@ make TAG=dev build-all
 
 ## Build and publish (two complete ways)
 
-This repo builds `automation-dev` locally, then publishes it to **one** registry per run. The steps are the same either way: **build → test → login → publish**. Only `REGISTRY` / `IMAGE_OWNER` (and credentials) change.
-
-Shared variables (both ways):
+Build locally, then publish with the same targets every time: `login`, `publish`, or `release` (build + publish). Destination is only env values.
 
 | Variable | Role |
 | --- | --- |
-| `REGISTRY` | Registry host |
-| `IMAGE_OWNER` | Path segment after host; empty omits it (LAN) |
-| `IMAGE_REPO` / `IMAGE_NAME` | `development-container` / `automation-dev` |
-| `VERSION` | Version tag (also pushes `:latest`) |
-| `REGISTRY_USER` / `REGISTRY_TOKEN` | Auth via env only — never commit |
+| `REGISTRY` | Registry host (`ghcr.io` or LAN OCI FQDN) |
+| `IMAGE_OWNER` | Path owner after host; empty for LAN |
+| `REGISTRY_USER` | Login username |
+| `REGISTRY_TOKEN` | Auth token (env only; never commit) |
 
-Path:
+Path: `$(REGISTRY)/[$(IMAGE_OWNER)/]development-container/automation-dev`
 
-- with owner: `$(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)`
-- without owner: `$(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)`
+Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, point appliance-release `build_flow.dev_container_image_registry.pull_ref` at the same ref.
 
-After publish, set appliance-release `build_flow.dev_container_image_registry.pull_ref` to the same image reference.
-
----
-
-### Way 1 — publish to GHCR
+### Way 1 — GHCR
 
 ```bash
+export REGISTRY=ghcr.io
 export REGISTRY_USER=<github-username>
+export IMAGE_OWNER=$REGISTRY_USER
 export REGISTRY_TOKEN=<PAT with write:packages>
 
 make build-dev
 make test-dev
-make login-ghcr
-make VERSION=v0.1.0 publish-ghcr
+make login
+make VERSION=v0.1.0 publish
 ```
 
-One-shot (build + publish):
+Or: `make VERSION=v0.1.0 release`
 
-```bash
-make VERSION=v0.1.0 release-ghcr
-```
+→ `ghcr.io/<github-username>/development-container/automation-dev:v0.1.0`
 
-Result:
+Auth details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
 
-```text
-ghcr.io/zoncaesaradmin/development-container/automation-dev:v0.1.0
-ghcr.io/zoncaesaradmin/development-container/automation-dev:latest
-```
-
-(`login-ghcr` / `publish-ghcr` set `REGISTRY=ghcr.io` and `IMAGE_OWNER=zoncaesaradmin`.)
-
-GHCR token details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
-
----
-
-### Way 2 — publish to a LAN OCI registry
+### Way 2 — LAN OCI registry
 
 ```bash
 export REGISTRY=artifact-dns-1.appliance.internal
 export REGISTRY_USER=<lan-user>
+export IMAGE_OWNER=
 export REGISTRY_TOKEN=<lan-token>
 
 make build-dev
 make test-dev
-make login-lan
-make VERSION=v0.1.0 publish-lan
+make login
+make VERSION=v0.1.0 publish
 ```
 
-One-shot (build + publish):
+Or: `make VERSION=v0.1.0 release`
 
-```bash
-make REGISTRY=artifact-dns-1.appliance.internal VERSION=v0.1.0 release-lan
-```
-
-Equivalent without named targets:
-
-```bash
-make REGISTRY=artifact-dns-1.appliance.internal IMAGE_OWNER= VERSION=v0.1.0 login publish
-```
-
-Result:
-
-```text
-artifact-dns-1.appliance.internal/development-container/automation-dev:v0.1.0
-artifact-dns-1.appliance.internal/development-container/automation-dev:latest
-```
-
-(`publish-lan` forces `IMAGE_OWNER=` empty so there is no GitHub-org path segment. Set `REGISTRY` to your LAN OCI host; it must not stay as the default `ghcr.io`.)
-
----
-
-Pick **one** of the two ways per publish. For real releases, set `VERSION` explicitly (e.g. `v0.1.0`).
+→ `artifact-dns-1.appliance.internal/development-container/automation-dev:v0.1.0`
 
 ## Dev container config
 
