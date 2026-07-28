@@ -1,19 +1,19 @@
-# Publishing Authentication (`REGISTRY_USER` / `REGISTRY_TOKEN`)
+# Publishing Authentication (`DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN`)
 
-The `make login`, `make publish`, and `make release` targets (see [Makefile](../Makefile) and the "Publishing images to a registry" section of the [README](../README.md)) authenticate to the configured `REGISTRY` using two environment variables:
+The `make login`, `make publish`, and `make release` targets (see [Makefile](../Makefile) and the "Publishing images to a registry" section of the [README](../README.md)) authenticate to the configured `DEV_REGISTRY` using two environment variables:
 
-- `REGISTRY_USER`
-- `REGISTRY_TOKEN`
+- `DEV_REGISTRY_USER`
+- `DEV_REGISTRY_TOKEN`
 
 These are never hardcoded or committed to the repo — they must always be supplied via the environment (or CI secrets). What to set them to depends on who/what is publishing.
 
-For a LAN / internal OCI registry, use the same `login` / `publish` / `release` targets with `REGISTRY=<lan-host>`, empty `IMAGE_OWNER`, and that registry's `REGISTRY_USER` / `REGISTRY_TOKEN`. Token format depends on the registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
+For a LAN / internal OCI registry, use the same `login` / `publish` / `release` targets with `DEV_REGISTRY=<lan-host>`, empty `DEV_IMAGE_OWNER`, and that registry's `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN`. Token format depends on the registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
 
 
 ## Individual GitHub user (manual/local publish)
 
-- **`REGISTRY_USER`** — your GitHub **username** (e.g. `zoncaesaradmin`). Not your email, not your display name.
-- **`REGISTRY_TOKEN`** — a GitHub **Personal Access Token (classic)** with the `write:packages` scope (this also grants `read:packages`). Do not use your account password.
+- **`DEV_REGISTRY_USER`** — your GitHub **username** (e.g. `zoncaesaradmin`). Not your email, not your display name.
+- **`DEV_REGISTRY_TOKEN`** — a GitHub **Personal Access Token (classic)** with the `write:packages` scope (this also grants `read:packages`). Do not use your account password.
 
 ### Creating the token
 
@@ -25,10 +25,10 @@ For a LAN / internal OCI registry, use the same `login` / `publish` / `release` 
 ### Using it
 
 ```bash
-export REGISTRY=ghcr.io
-export REGISTRY_USER=zoncaesaradmin
-export IMAGE_OWNER=$REGISTRY_USER
-export REGISTRY_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
+export DEV_REGISTRY=ghcr.io
+export DEV_REGISTRY_USER=zoncaesaradmin
+export DEV_IMAGE_OWNER=$DEV_REGISTRY_USER
+export DEV_REGISTRY_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 make login
 ```
 
@@ -43,8 +43,8 @@ Treat the token like a password:
 
 CI does not need a manually created PAT for the common case — GitHub Actions provides a built-in, short-lived, repo-scoped token automatically.
 
-- **`REGISTRY_USER`** → `${{ github.actor }}` (the user/bot that triggered the run). A fixed placeholder string also works since GHCR only cares that the token is valid.
-- **`REGISTRY_TOKEN`** → `${{ secrets.GITHUB_TOKEN }}`, injected automatically into every workflow run. Requires the job to declare `permissions: packages: write`.
+- **`DEV_REGISTRY_USER`** → `${{ github.actor }}` (the user/bot that triggered the run). A fixed placeholder string also works since GHCR only cares that the token is valid.
+- **`DEV_REGISTRY_TOKEN`** → `${{ secrets.GITHUB_TOKEN }}`, injected automatically into every workflow run. Requires the job to declare `permissions: packages: write`.
 
 Example workflow:
 
@@ -62,10 +62,10 @@ jobs:
       contents: read
       packages: write
     env:
-      REGISTRY: ghcr.io
-      IMAGE_OWNER: ${{ github.actor }}
-      REGISTRY_USER: ${{ github.actor }}
-      REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      DEV_REGISTRY: ghcr.io
+      DEV_IMAGE_OWNER: ${{ github.actor }}
+      DEV_REGISTRY_USER: ${{ github.actor }}
+      DEV_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - name: Install buildah
@@ -90,4 +90,4 @@ Only if the image must be published to a package under a **different** repo or o
 
 ## Future registry migration
 
-Changing destination is only env values (`REGISTRY`, `IMAGE_OWNER`, credentials). Same `login` / `publish` / `release` targets. The `REGISTRY_USER` / `REGISTRY_TOKEN` contract stays the same shape (GitHub PAT vs LAN registry token).
+Changing destination is only env values (`DEV_REGISTRY`, `DEV_IMAGE_OWNER`, credentials). Same `login` / `publish` / `release` targets. The `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN` contract stays the same shape (GitHub PAT vs LAN registry token).

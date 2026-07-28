@@ -10,27 +10,27 @@ PYTHON_IMAGE ?= localhost/automation-python:$(TAG)
 DEV_IMAGE ?= localhost/automation-dev:$(TAG)
 
 # Publishing. Set all four in the environment (or make args):
-#   REGISTRY, IMAGE_OWNER, REGISTRY_USER, REGISTRY_TOKEN
-# IMAGE_OWNER empty → $(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)  (LAN)
-# IMAGE_OWNER set   → $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)  (GHCR)
-# TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
+#   DEV_REGISTRY, DEV_IMAGE_OWNER, DEV_REGISTRY_USER, DEV_REGISTRY_TOKEN
+# DEV_IMAGE_OWNER empty → $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)  (LAN)
+# DEV_IMAGE_OWNER set   → $(DEV_REGISTRY)/$(DEV_IMAGE_OWNER)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)  (GHCR)
+# DEV_TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
 # yet trusted on the client). Default true for GHCR.
-REGISTRY ?=
-IMAGE_OWNER ?=
-IMAGE_REPO ?= development-container
-IMAGE_NAME ?= dev-build
+DEV_REGISTRY ?=
+DEV_IMAGE_OWNER ?=
+DEV_IMAGE_REPO ?= development-container
+DEV_IMAGE_NAME ?= dev-build
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-TLS_VERIFY ?= true
+DEV_TLS_VERIFY ?= true
 
-ifeq ($(strip $(IMAGE_OWNER)),)
-REMOTE_IMAGE := $(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)
+ifeq ($(strip $(DEV_IMAGE_OWNER)),)
+REMOTE_IMAGE := $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
 else
-REMOTE_IMAGE := $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)
+REMOTE_IMAGE := $(DEV_REGISTRY)/$(DEV_IMAGE_OWNER)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
 endif
 
-# buildah login/push: --tls-verify=false when TLS_VERIFY is false/0/no.
+# buildah login/push: --tls-verify=false when DEV_TLS_VERIFY is false/0/no.
 TLS_VERIFY_FLAG :=
-ifeq ($(filter false 0 no FALSE NO,$(TLS_VERIFY)),$(TLS_VERIFY))
+ifeq ($(filter false 0 no FALSE NO,$(DEV_TLS_VERIFY)),$(DEV_TLS_VERIFY))
 TLS_VERIFY_FLAG := --tls-verify=false
 endif
 
@@ -58,10 +58,10 @@ shell-dev:
 	$(RUN) --rm -it --privileged --device /dev/fuse -v $(CURDIR):/workspace -w /workspace $(DEV_IMAGE) bash
 
 login:
-	@test -n "$(REGISTRY)" || (echo "REGISTRY is not set" >&2 && exit 1)
-	@test -n "$(REGISTRY_USER)" || (echo "REGISTRY_USER is not set" >&2 && exit 1)
-	@test -n "$(REGISTRY_TOKEN)" || (echo "REGISTRY_TOKEN is not set" >&2 && exit 1)
-	echo "$(REGISTRY_TOKEN)" | buildah login $(TLS_VERIFY_FLAG) --username "$(REGISTRY_USER)" --password-stdin $(REGISTRY)
+	@test -n "$(DEV_REGISTRY)" || (echo "DEV_REGISTRY is not set" >&2 && exit 1)
+	@test -n "$(DEV_REGISTRY_USER)" || (echo "DEV_REGISTRY_USER is not set" >&2 && exit 1)
+	@test -n "$(DEV_REGISTRY_TOKEN)" || (echo "DEV_REGISTRY_TOKEN is not set" >&2 && exit 1)
+	echo "$(DEV_REGISTRY_TOKEN)" | buildah login $(TLS_VERIFY_FLAG) --username "$(DEV_REGISTRY_USER)" --password-stdin $(DEV_REGISTRY)
 
 tag-dev:
 	buildah tag $(DEV_IMAGE) $(REMOTE_IMAGE):$(VERSION)

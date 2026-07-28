@@ -106,23 +106,23 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 
 | Variable | Role |
 | --- | --- |
-| `REGISTRY` | Registry host (`ghcr.io` or LAN OCI FQDN) |
-| `IMAGE_OWNER` | Path owner after host; empty for LAN |
-| `REGISTRY_USER` | Login username |
-| `REGISTRY_TOKEN` | Auth token (env only; never commit) |
-| `TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
+| `DEV_REGISTRY` | Registry host (`ghcr.io` or LAN OCI FQDN) |
+| `DEV_IMAGE_OWNER` | Path owner after host; empty for LAN |
+| `DEV_REGISTRY_USER` | Login username |
+| `DEV_REGISTRY_TOKEN` | Auth token (env only; never commit) |
+| `DEV_TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
 
-Path: `$(REGISTRY)/[$(IMAGE_OWNER)/]development-container/dev-build`
+Path: `$(DEV_REGISTRY)/[$(DEV_IMAGE_OWNER)/]development-container/dev-build`
 
-Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, point appliance-release `build_flow.dev_container_image_registry.pull_ref` at the same ref.
+Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, set appliance-release `build_flow.dev_image_pull` fields (`registry`, `image_repo`, `image_name`, `image_tag`) to this same image reference.
 
 ### Way 1 — GHCR
 
 ```bash
-export REGISTRY=ghcr.io
-export REGISTRY_USER=<github-username>
-export IMAGE_OWNER=$REGISTRY_USER
-export REGISTRY_TOKEN=<PAT with write:packages>
+export DEV_REGISTRY=ghcr.io
+export DEV_REGISTRY_USER=<github-username>
+export DEV_IMAGE_OWNER=$DEV_REGISTRY_USER
+export DEV_REGISTRY_TOKEN=<PAT with write:packages>
 
 make build-dev
 make test-dev
@@ -141,11 +141,11 @@ Auth details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
 Until the appliance CA is trusted on the build host, skip TLS verify:
 
 ```bash
-export REGISTRY=artifact-dns-1.appliance.internal
-export REGISTRY_USER=<lan-user>
-export IMAGE_OWNER=
-export REGISTRY_TOKEN=<lan-token>
-export TLS_VERIFY=false
+export DEV_REGISTRY=artifact-dns-1.appliance.internal
+export DEV_REGISTRY_USER=<lan-user>
+export DEV_IMAGE_OWNER=
+export DEV_REGISTRY_TOKEN=<lan-token>
+export DEV_TLS_VERIFY=false
 
 make build-dev
 make test-dev
@@ -153,7 +153,7 @@ make login
 make VERSION=v0.1.0 publish
 ```
 
-Or: `make TLS_VERIFY=false VERSION=v0.1.0 release`
+Or: `make DEV_TLS_VERIFY=false VERSION=v0.1.0 release`
 
 → `artifact-dns-1.appliance.internal/development-container/dev-build:v0.1.0`
 
