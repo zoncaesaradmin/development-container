@@ -110,7 +110,7 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 | `DEV_IMAGE_REPO` | Repository path after host (include owner/namespace when needed) |
 | `DEV_REGISTRY_USER` | Login username |
 | `DEV_REGISTRY_TOKEN` | Auth token (env only; never commit) |
-| `DEV_TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
+| `DEV_REGISTRY_TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
 
 Path: `$(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)`
 
@@ -145,7 +145,7 @@ export DEV_REGISTRY=artifact-dns-1.appliance.internal
 export DEV_REGISTRY_USER=<lan-user>
 export DEV_IMAGE_REPO=development-container
 export DEV_REGISTRY_TOKEN=<lan-token>
-export DEV_TLS_VERIFY=false
+export DEV_REGISTRY_TLS_VERIFY=false
 
 make build-dev
 make test-dev
@@ -153,7 +153,7 @@ make login
 make VERSION=v0.1.0 publish
 ```
 
-Or: `make DEV_TLS_VERIFY=false VERSION=v0.1.0 release`
+Or: `make DEV_REGISTRY_TLS_VERIFY=false VERSION=v0.1.0 release`
 
 → `artifact-dns-1.appliance.internal/development-container/dev-build:v0.1.0`
 

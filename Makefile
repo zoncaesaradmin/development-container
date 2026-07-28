@@ -12,19 +12,19 @@ DEV_IMAGE ?= localhost/automation-dev:$(TAG)
 # Publishing. Set these in the environment (or make args):
 #   DEV_REGISTRY, DEV_IMAGE_REPO, DEV_IMAGE_NAME, DEV_REGISTRY_USER, DEV_REGISTRY_TOKEN
 # Full destination path: $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
-# DEV_TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
+# DEV_REGISTRY_TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
 # yet trusted on the client). Default true for GHCR.
 DEV_REGISTRY ?=
 DEV_IMAGE_REPO ?= zoncaesaradmin/development-container
 DEV_IMAGE_NAME ?= dev-build
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
-DEV_TLS_VERIFY ?= true
+DEV_REGISTRY_TLS_VERIFY ?= true
 
 REMOTE_IMAGE := $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
 
-# buildah login/push: --tls-verify=false when DEV_TLS_VERIFY is false/0/no.
+# buildah login/push: --tls-verify=false when DEV_REGISTRY_TLS_VERIFY is false/0/no.
 TLS_VERIFY_FLAG :=
-ifeq ($(filter false 0 no FALSE NO,$(DEV_TLS_VERIFY)),$(DEV_TLS_VERIFY))
+ifeq ($(filter false 0 no FALSE NO,$(DEV_REGISTRY_TLS_VERIFY)),$(DEV_REGISTRY_TLS_VERIFY))
 TLS_VERIFY_FLAG := --tls-verify=false
 endif
 
