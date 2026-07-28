@@ -49,7 +49,7 @@ CI does not need a manually created PAT for the common case — GitHub Actions p
 Example workflow:
 
 ```yaml
-name: Publish automation-dev image
+name: Publish development-container/dev-build image
 
 on:
   push:

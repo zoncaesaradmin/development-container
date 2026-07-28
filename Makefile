@@ -16,7 +16,7 @@ DEV_IMAGE ?= localhost/automation-dev:$(TAG)
 REGISTRY ?=
 IMAGE_OWNER ?=
 IMAGE_REPO ?= development-container
-IMAGE_NAME ?= automation-dev
+IMAGE_NAME ?= dev-build
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 
 ifeq ($(strip $(IMAGE_OWNER)),)

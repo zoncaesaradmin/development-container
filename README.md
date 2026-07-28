@@ -111,7 +111,7 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 | `REGISTRY_USER` | Login username |
 | `REGISTRY_TOKEN` | Auth token (env only; never commit) |
 
-Path: `$(REGISTRY)/[$(IMAGE_OWNER)/]development-container/automation-dev`
+Path: `$(REGISTRY)/[$(IMAGE_OWNER)/]development-container/dev-build`
 
 Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, point appliance-release `build_flow.dev_container_image_registry.pull_ref` at the same ref.
 
@@ -131,7 +131,7 @@ make VERSION=v0.1.0 publish
 
 Or: `make VERSION=v0.1.0 release`
 
-→ `ghcr.io/<github-username>/development-container/automation-dev:v0.1.0`
+→ `ghcr.io/<github-username>/development-container/dev-build:v0.1.0`
 
 Auth details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
 
@@ -151,7 +151,7 @@ make VERSION=v0.1.0 publish
 
 Or: `make VERSION=v0.1.0 release`
 
-→ `artifact-dns-1.appliance.internal/development-container/automation-dev:v0.1.0`
+→ `artifact-dns-1.appliance.internal/development-container/dev-build:v0.1.0`
 
 ## Dev container config
 
