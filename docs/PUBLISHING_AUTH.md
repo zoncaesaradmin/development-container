@@ -7,6 +7,8 @@ The `make login`, `make publish`, and `make release` targets (see [Makefile](../
 
 These are never hardcoded or committed to the repo — they must always be supplied via the environment (or CI secrets). What to set them to depends on who/what is publishing.
 
+For a LAN / internal OCI registry, use the same variables (`REGISTRY`, `IMAGE_OWNER=`, `REGISTRY_USER`, `REGISTRY_TOKEN`) and either `make login-lan` / `make publish-lan` or plain `make login publish`. Token format depends on that registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
+
 ## Individual GitHub user (manual/local publish)
 
 - **`REGISTRY_USER`** — your GitHub **username** (e.g. `zoncaesaradmin`). Not your email, not your display name.

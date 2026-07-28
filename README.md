@@ -100,67 +100,97 @@ You can override the tag:
 make TAG=dev build-all
 ```
 
-## Publishing images to a registry
+## Build and publish (two complete ways)
 
-After building locally, the `automation-dev` image can be published to a container registry so other build machines can pull it instead of rebuilding.
+This repo builds `automation-dev` locally, then publishes it to **one** registry per run. The steps are the same either way: **build → test → login → publish**. Only `REGISTRY` / `IMAGE_OWNER` (and credentials) change.
 
-Publishing is intentionally split from building:
+Shared variables (both ways):
 
-- `build-dev` only produces the local image (`localhost/automation-dev:$(TAG)`).
-- `tag-dev` / `push-dev` / `publish` reuse that already-built local image — they never trigger a rebuild.
-- `release` is a convenience target that does both: `build-dev` then `publish`.
+| Variable | Role |
+| --- | --- |
+| `REGISTRY` | Registry host |
+| `IMAGE_OWNER` | Path segment after host; empty omits it (LAN) |
+| `IMAGE_REPO` / `IMAGE_NAME` | `development-container` / `automation-dev` |
+| `VERSION` | Version tag (also pushes `:latest`) |
+| `REGISTRY_USER` / `REGISTRY_TOKEN` | Auth via env only — never commit |
 
-### Registry configuration (Makefile variables)
+Path:
 
-| Variable | Default | Purpose |
-| --- | --- | --- |
-| `REGISTRY` | `ghcr.io` | Registry hostname. **This is the only variable you change to migrate to a different registry** (e.g. a future internal Zot server). |
-| `IMAGE_OWNER` | `zoncaesaradmin` | GitHub org/user (or registry namespace) that owns the image. |
-| `IMAGE_REPO` | `development-container` | Repository name, used as part of the image path. |
-| `IMAGE_NAME` | `automation-dev` | Image name. |
-| `VERSION` | current `git describe` (falls back to `dev`) | Immutable version tag pushed alongside `latest`. Override for a real release: `make VERSION=v0.1.0 publish`. |
+- with owner: `$(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)`
+- without owner: `$(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)`
 
-These combine into `REMOTE_IMAGE = $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)`, currently:
+After publish, set appliance-release `build_flow.dev_container_image_registry.pull_ref` to the same image reference.
 
-```text
-ghcr.io/zoncaesaradmin/development-container/automation-dev
-```
+---
 
-When the future local/Zot registry is ready, publishing to it requires changing only `REGISTRY` (e.g. `make REGISTRY=registry.zon.local/dev publish`) — no other target or logic changes.
-
-### Authenticating to GHCR
-
-Publishing needs a GitHub Personal Access Token with `write:packages` and `read:packages` scopes. **Never commit the token** — pass it via environment variables only:
+### Way 1 — publish to GHCR
 
 ```bash
-export REGISTRY_USER=<your-github-username>
-export REGISTRY_TOKEN=<your-personal-access-token>
-make login
-```
+export REGISTRY_USER=<github-username>
+export REGISTRY_TOKEN=<PAT with write:packages>
 
-For what exactly to set `REGISTRY_USER` / `REGISTRY_TOKEN` to for an individual GitHub user vs. CI (GitHub Actions), including token creation steps, see [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
-
-`make login` fails fast with a clear error if either variable is missing, rather than silently no-op'ing.
-
-### Publishing a build
-
-Build first, then publish the already-built image (recommended — lets you validate with `make test-dev` before publishing):
-
-```bash
 make build-dev
 make test-dev
-make VERSION=v0.1.0 publish
+make login-ghcr
+make VERSION=v0.1.0 publish-ghcr
 ```
 
-This tags and pushes both `ghcr.io/zoncaesaradmin/development-container/automation-dev:v0.1.0` and `...:latest`. The push fails (and stops the build) if either push fails, since `make` aborts on the first non-zero exit code.
-
-Or do both in one step:
+One-shot (build + publish):
 
 ```bash
-make VERSION=v0.1.0 release
+make VERSION=v0.1.0 release-ghcr
 ```
 
-If `VERSION` is omitted, it defaults to the current `git describe` output (e.g. a commit-based tag), so every build is still traceable even without an explicit version — but for real releases, set `VERSION` explicitly to a semantic tag.
+Result:
+
+```text
+ghcr.io/zoncaesaradmin/development-container/automation-dev:v0.1.0
+ghcr.io/zoncaesaradmin/development-container/automation-dev:latest
+```
+
+(`login-ghcr` / `publish-ghcr` set `REGISTRY=ghcr.io` and `IMAGE_OWNER=zoncaesaradmin`.)
+
+GHCR token details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
+
+---
+
+### Way 2 — publish to a LAN OCI registry
+
+```bash
+export REGISTRY=artifact-dns-1.appliance.internal
+export REGISTRY_USER=<lan-user>
+export REGISTRY_TOKEN=<lan-token>
+
+make build-dev
+make test-dev
+make login-lan
+make VERSION=v0.1.0 publish-lan
+```
+
+One-shot (build + publish):
+
+```bash
+make REGISTRY=artifact-dns-1.appliance.internal VERSION=v0.1.0 release-lan
+```
+
+Equivalent without named targets:
+
+```bash
+make REGISTRY=artifact-dns-1.appliance.internal IMAGE_OWNER= VERSION=v0.1.0 login publish
+```
+
+Result:
+
+```text
+artifact-dns-1.appliance.internal/development-container/automation-dev:v0.1.0
+artifact-dns-1.appliance.internal/development-container/automation-dev:latest
+```
+
+(`publish-lan` forces `IMAGE_OWNER=` empty so there is no GitHub-org path segment. Set `REGISTRY` to your LAN OCI host; it must not stay as the default `ghcr.io`.)
+
+---
+
+Pick **one** of the two ways per publish. For real releases, set `VERSION` explicitly (e.g. `v0.1.0`).
 
 ## Dev container config
 
