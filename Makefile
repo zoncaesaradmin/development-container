@@ -9,24 +9,18 @@ GO_IMAGE ?= localhost/automation-go:$(TAG)
 PYTHON_IMAGE ?= localhost/automation-python:$(TAG)
 DEV_IMAGE ?= localhost/automation-dev:$(TAG)
 
-# Publishing. Set all four in the environment (or make args):
-#   DEV_REGISTRY, DEV_IMAGE_OWNER, DEV_REGISTRY_USER, DEV_REGISTRY_TOKEN
-# DEV_IMAGE_OWNER empty → $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)  (LAN)
-# DEV_IMAGE_OWNER set   → $(DEV_REGISTRY)/$(DEV_IMAGE_OWNER)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)  (GHCR)
+# Publishing. Set these in the environment (or make args):
+#   DEV_REGISTRY, DEV_IMAGE_REPO, DEV_IMAGE_NAME, DEV_REGISTRY_USER, DEV_REGISTRY_TOKEN
+# Full destination path: $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
 # DEV_TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
 # yet trusted on the client). Default true for GHCR.
 DEV_REGISTRY ?=
-DEV_IMAGE_OWNER ?=
-DEV_IMAGE_REPO ?= development-container
+DEV_IMAGE_REPO ?= zoncaesaradmin/development-container
 DEV_IMAGE_NAME ?= dev-build
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
 DEV_TLS_VERIFY ?= true
 
-ifeq ($(strip $(DEV_IMAGE_OWNER)),)
 REMOTE_IMAGE := $(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
-else
-REMOTE_IMAGE := $(DEV_REGISTRY)/$(DEV_IMAGE_OWNER)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)
-endif
 
 # buildah login/push: --tls-verify=false when DEV_TLS_VERIFY is false/0/no.
 TLS_VERIFY_FLAG :=

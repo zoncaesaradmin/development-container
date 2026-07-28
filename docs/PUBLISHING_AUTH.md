@@ -7,7 +7,7 @@ The `make login`, `make publish`, and `make release` targets (see [Makefile](../
 
 These are never hardcoded or committed to the repo — they must always be supplied via the environment (or CI secrets). What to set them to depends on who/what is publishing.
 
-For a LAN / internal OCI registry, use the same `login` / `publish` / `release` targets with `DEV_REGISTRY=<lan-host>`, empty `DEV_IMAGE_OWNER`, and that registry's `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN`. Token format depends on the registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
+For a LAN / internal OCI registry, use the same `login` / `publish` / `release` targets with `DEV_REGISTRY=<lan-host>`, `DEV_IMAGE_REPO=development-container`, and that registry's `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN`. Token format depends on the registry (appliance API token, htpasswd, etc.), not GitHub PAT scopes.
 
 
 ## Individual GitHub user (manual/local publish)
@@ -27,7 +27,7 @@ For a LAN / internal OCI registry, use the same `login` / `publish` / `release` 
 ```bash
 export DEV_REGISTRY=ghcr.io
 export DEV_REGISTRY_USER=zoncaesaradmin
-export DEV_IMAGE_OWNER=$DEV_REGISTRY_USER
+export DEV_IMAGE_REPO=$DEV_REGISTRY_USER/development-container
 export DEV_REGISTRY_TOKEN=ghp_xxxxxxxxxxxxxxxxxxxx
 make login
 ```
@@ -63,7 +63,7 @@ jobs:
       packages: write
     env:
       DEV_REGISTRY: ghcr.io
-      DEV_IMAGE_OWNER: ${{ github.actor }}
+      DEV_IMAGE_REPO: ${{ github.actor }}/development-container
       DEV_REGISTRY_USER: ${{ github.actor }}
       DEV_REGISTRY_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
@@ -90,4 +90,4 @@ Only if the image must be published to a package under a **different** repo or o
 
 ## Future registry migration
 
-Changing destination is only env values (`DEV_REGISTRY`, `DEV_IMAGE_OWNER`, credentials). Same `login` / `publish` / `release` targets. The `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN` contract stays the same shape (GitHub PAT vs LAN registry token).
+Changing destination is only env values (`DEV_REGISTRY`, `DEV_IMAGE_REPO`, `DEV_IMAGE_NAME`, credentials). Same `login` / `publish` / `release` targets. The `DEV_REGISTRY_USER` / `DEV_REGISTRY_TOKEN` contract stays the same shape (GitHub PAT vs LAN registry token).

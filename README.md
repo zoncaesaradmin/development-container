@@ -107,12 +107,12 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 | Variable | Role |
 | --- | --- |
 | `DEV_REGISTRY` | Registry host (`ghcr.io` or LAN OCI FQDN) |
-| `DEV_IMAGE_OWNER` | Path owner after host; empty for LAN |
+| `DEV_IMAGE_REPO` | Repository path after host (include owner/namespace when needed) |
 | `DEV_REGISTRY_USER` | Login username |
 | `DEV_REGISTRY_TOKEN` | Auth token (env only; never commit) |
 | `DEV_TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
 
-Path: `$(DEV_REGISTRY)/[$(DEV_IMAGE_OWNER)/]development-container/dev-build`
+Path: `$(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)`
 
 Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, set appliance-release `build_flow.dev_image_pull` fields (`registry`, `image_repo`, `image_name`, `image_tag`) to this same image reference.
 
@@ -121,7 +121,7 @@ Set `VERSION` explicitly for real releases (also pushes `:latest`). After publis
 ```bash
 export DEV_REGISTRY=ghcr.io
 export DEV_REGISTRY_USER=<github-username>
-export DEV_IMAGE_OWNER=$DEV_REGISTRY_USER
+export DEV_IMAGE_REPO=$DEV_REGISTRY_USER/development-container
 export DEV_REGISTRY_TOKEN=<PAT with write:packages>
 
 make build-dev
@@ -143,7 +143,7 @@ Until the appliance CA is trusted on the build host, skip TLS verify:
 ```bash
 export DEV_REGISTRY=artifact-dns-1.appliance.internal
 export DEV_REGISTRY_USER=<lan-user>
-export DEV_IMAGE_OWNER=
+export DEV_IMAGE_REPO=development-container
 export DEV_REGISTRY_TOKEN=<lan-token>
 export DEV_TLS_VERIFY=false
 
