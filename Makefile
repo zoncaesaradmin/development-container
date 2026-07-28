@@ -13,16 +13,25 @@ DEV_IMAGE ?= localhost/automation-dev:$(TAG)
 #   REGISTRY, IMAGE_OWNER, REGISTRY_USER, REGISTRY_TOKEN
 # IMAGE_OWNER empty → $(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)  (LAN)
 # IMAGE_OWNER set   → $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)  (GHCR)
+# TLS_VERIFY=false skips registry TLS verification (LAN / appliance CA not
+# yet trusted on the client). Default true for GHCR.
 REGISTRY ?=
 IMAGE_OWNER ?=
 IMAGE_REPO ?= development-container
 IMAGE_NAME ?= dev-build
 VERSION ?= $(shell git describe --tags --always --dirty 2>/dev/null || echo dev)
+TLS_VERIFY ?= true
 
 ifeq ($(strip $(IMAGE_OWNER)),)
 REMOTE_IMAGE := $(REGISTRY)/$(IMAGE_REPO)/$(IMAGE_NAME)
 else
 REMOTE_IMAGE := $(REGISTRY)/$(IMAGE_OWNER)/$(IMAGE_REPO)/$(IMAGE_NAME)
+endif
+
+# buildah login/push: --tls-verify=false when TLS_VERIFY is false/0/no.
+TLS_VERIFY_FLAG :=
+ifeq ($(filter false 0 no FALSE NO,$(TLS_VERIFY)),$(TLS_VERIFY))
+TLS_VERIFY_FLAG := --tls-verify=false
 endif
 
 .PHONY: build-base build-go build-python build-dev build-all test-dev shell-dev clean \
@@ -52,15 +61,15 @@ login:
 	@test -n "$(REGISTRY)" || (echo "REGISTRY is not set" >&2 && exit 1)
 	@test -n "$(REGISTRY_USER)" || (echo "REGISTRY_USER is not set" >&2 && exit 1)
 	@test -n "$(REGISTRY_TOKEN)" || (echo "REGISTRY_TOKEN is not set" >&2 && exit 1)
-	echo "$(REGISTRY_TOKEN)" | buildah login --username "$(REGISTRY_USER)" --password-stdin $(REGISTRY)
+	echo "$(REGISTRY_TOKEN)" | buildah login $(TLS_VERIFY_FLAG) --username "$(REGISTRY_USER)" --password-stdin $(REGISTRY)
 
 tag-dev:
 	buildah tag $(DEV_IMAGE) $(REMOTE_IMAGE):$(VERSION)
 	buildah tag $(DEV_IMAGE) $(REMOTE_IMAGE):latest
 
 push-dev: tag-dev
-	buildah push $(REMOTE_IMAGE):$(VERSION)
-	buildah push $(REMOTE_IMAGE):latest
+	buildah push $(TLS_VERIFY_FLAG) $(REMOTE_IMAGE):$(VERSION)
+	buildah push $(TLS_VERIFY_FLAG) $(REMOTE_IMAGE):latest
 
 publish: push-dev
 	@echo "Published $(REMOTE_IMAGE):$(VERSION) and $(REMOTE_IMAGE):latest"

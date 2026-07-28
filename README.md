@@ -110,6 +110,7 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 | `IMAGE_OWNER` | Path owner after host; empty for LAN |
 | `REGISTRY_USER` | Login username |
 | `REGISTRY_TOKEN` | Auth token (env only; never commit) |
+| `TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
 
 Path: `$(REGISTRY)/[$(IMAGE_OWNER)/]development-container/dev-build`
 
@@ -137,11 +138,14 @@ Auth details: [docs/PUBLISHING_AUTH.md](docs/PUBLISHING_AUTH.md).
 
 ### Way 2 — LAN OCI registry
 
+Until the appliance CA is trusted on the build host, skip TLS verify:
+
 ```bash
 export REGISTRY=artifact-dns-1.appliance.internal
 export REGISTRY_USER=<lan-user>
 export IMAGE_OWNER=
 export REGISTRY_TOKEN=<lan-token>
+export TLS_VERIFY=false
 
 make build-dev
 make test-dev
@@ -149,7 +153,7 @@ make login
 make VERSION=v0.1.0 publish
 ```
 
-Or: `make VERSION=v0.1.0 release`
+Or: `make TLS_VERIFY=false VERSION=v0.1.0 release`
 
 → `artifact-dns-1.appliance.internal/development-container/dev-build:v0.1.0`
 
