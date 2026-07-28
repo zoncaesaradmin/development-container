@@ -1,5 +1,5 @@
 {
-  "name": "automation-dev",
+  "name": "dev-build",
   "build": {
     "context": "..",
     "dockerfile": "../Containerfile.dev"
@@ -13,7 +13,7 @@
     "STORAGE_DRIVER": "vfs",
     "XDG_RUNTIME_DIR": "/run/user/1000"
   },
-  "remoteUser": "vscode",
+  "remoteUser": "devcontainer",
   "customizations": {
     "vscode": {
       "extensions": [

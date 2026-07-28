@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=localhost/automation-base:latest
 FROM ${BASE_IMAGE}
 
-ARG USERNAME=vscode
+ARG USERNAME=devcontainer
 ARG TARGETARCH=amd64
 ARG GO_VERSION=1.26.0
 

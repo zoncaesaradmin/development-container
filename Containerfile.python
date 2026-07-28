@@ -1,7 +1,7 @@
 ARG BASE_IMAGE=localhost/automation-base:latest
 FROM ${BASE_IMAGE}
 
-ARG USERNAME=vscode
+ARG USERNAME=devcontainer
 
 ENV USERNAME=${USERNAME}
 ENV USER_HOME=/home/${USERNAME}

@@ -21,7 +21,7 @@ This keeps the dev image smaller and easier to maintain while still covering cur
 ## Tooling requirements (who needs what)
 
 - **Build machine** (builds these `Containerfile.*` into images): needs **Buildah** only. Podman is not required to build.
-- **Run machine** (runs the resulting `automation-dev` container, e.g. via `make shell-dev` / `make test-dev`): needs **Podman**.
+- **Run machine** (runs the resulting `dev-build` container, e.g. via `make shell-dev` / `make test-dev`): needs **Podman**.
 - **Skopeo** ships inside the built image itself, for developers to use from within their devcontainer. It is not a host/build-machine dependency.
 
 These can be the same machine or different ones — the point is the build step itself only depends on Buildah.
@@ -92,7 +92,7 @@ By default, images are tagged locally as:
 - `localhost/automation-base:latest`
 - `localhost/automation-go:latest`
 - `localhost/automation-python:latest`
-- `localhost/automation-dev:latest`
+- `localhost/dev-build:latest`
 
 You can override the tag:
 

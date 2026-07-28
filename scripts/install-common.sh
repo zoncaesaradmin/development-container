@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-USERNAME="${USERNAME:-vscode}"
+USERNAME="${USERNAME:-devcontainer}"
 USER_UID="${USER_UID:-1000}"
 USER_GID="${USER_GID:-1000}"
 USER_HOME="/home/${USERNAME}"

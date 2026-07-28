@@ -7,7 +7,7 @@ GO_VERSION ?= 1.26.0
 BASE_IMAGE ?= localhost/automation-base:$(TAG)
 GO_IMAGE ?= localhost/automation-go:$(TAG)
 PYTHON_IMAGE ?= localhost/automation-python:$(TAG)
-DEV_IMAGE ?= localhost/automation-dev:$(TAG)
+DEV_IMAGE ?= localhost/dev-build:$(TAG)
 
 # Publishing. Set these in the environment (or make args):
 #   DEV_REGISTRY, DEV_IMAGE_REPO, DEV_IMAGE_NAME, DEV_REGISTRY_USER, DEV_REGISTRY_TOKEN

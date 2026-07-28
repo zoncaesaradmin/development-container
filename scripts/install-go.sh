@@ -2,7 +2,7 @@
 
 set -euo pipefail
 
-USERNAME="${USERNAME:-vscode}"
+USERNAME="${USERNAME:-devcontainer}"
 GO_VERSION="${GO_VERSION:-1.26.0}"
 TARGETARCH="${TARGETARCH:-}"
 USER_HOME="/home/${USERNAME}"
