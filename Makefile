@@ -65,10 +65,14 @@ push-dev: tag-dev
 	buildah push $(TLS_VERIFY_FLAG) $(REMOTE_IMAGE):$(VERSION)
 	buildah push $(TLS_VERIFY_FLAG) $(REMOTE_IMAGE):latest
 
-publish: push-dev
+publish: login
+	$(MAKE) push-dev
 	@echo "Published $(REMOTE_IMAGE):$(VERSION) and $(REMOTE_IMAGE):latest"
 
-release: build-dev publish
+# login before publish so the push only proceeds after a successful registry login.
+release:
+	$(MAKE) build-dev
+	$(MAKE) publish
 
 clean:
 	find . -type d \( -name __pycache__ -o -name .pytest_cache -o -name .mypy_cache -o -name .ruff_cache -o -name .cache -o -name .local \) -prune -exec rm -rf {} +
