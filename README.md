@@ -13,6 +13,7 @@ The combined development image is intentionally limited to:
 
 - Go
 - Python
+- Node.js and npm for React/TypeScript UI builds
 - OCI container tooling (`podman`, `buildah`, `skopeo`)
 - Common developer and native build utilities needed for Git workflows and CGO-enabled builds
 
@@ -35,7 +36,7 @@ These can be the same machine or different ones — the point is the build step 
 - `Containerfile.python`
   Builds on `automation-base` and adds Python and common Python packaging tools.
 - `Containerfile.dev`
-  Builds a self-contained combined dev image for Go + Python work so the dev container can build directly without relying on locally pre-built intermediate images.
+  Builds a self-contained combined dev image for Go + Python + Node.js work so the dev container can build directly without relying on locally pre-built intermediate images.
 
 ## Build strategy
 
@@ -112,6 +113,10 @@ Build locally, then publish with the same targets every time: `login`, `publish`
 | `DEV_REGISTRY_TOKEN` | Auth token (env only; never commit) |
 | `DEV_REGISTRY_TLS_VERIFY` | `true` (default) or `false` to pass `--tls-verify=false` on login/push |
 
+The combined image also accepts `NODE_VERSION` at build time. It defaults to
+Node.js `22.19.0`, which satisfies the Vite 8 engine requirement used by the
+appliance control-plane UI.
+
 Path: `$(DEV_REGISTRY)/$(DEV_IMAGE_REPO)/$(DEV_IMAGE_NAME)`
 
 Set `VERSION` explicitly for real releases (also pushes `:latest`). After publish, set appliance-release `build_flow.dev_image_pull` fields (`registry`, `image_repo`, `image_name`, `image_tag`) to this same image reference.
@@ -169,7 +174,7 @@ Both are configured for nested OCI image builds with the combined Go + Python to
 
 ## Keeping the image lean
 
-The combined dev image intentionally does not include extra language runtimes such as Java, Node.js, Rust, Ruby, or .NET yet. The shared base still keeps the common developer packages and C/C++ build toolchain needed by many Go and Python projects, including CGO-backed builds.
+The combined dev image intentionally does not include extra language runtimes such as Java, Rust, Ruby, or .NET yet. Node.js is included because the appliance control-plane UI is now built from React and TypeScript sources. The shared base still keeps the common developer packages and C/C++ build toolchain needed by many Go and Python projects, including CGO-backed builds.
 
 ## Adding another language later
 
@@ -185,6 +190,7 @@ The safest places to extend are:
 - shared packages: `scripts/install-common.sh`
 - Go toolchain: `scripts/install-go.sh`
 - Python toolchain: `scripts/install-python.sh`
+- Node.js toolchain: `scripts/install-node.sh`
 - combined dev image contents: `Containerfile.dev`
 - build commands and tags: `Makefile`
 

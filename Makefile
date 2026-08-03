@@ -3,6 +3,7 @@ RUN ?= podman run
 TAG ?= latest
 DEBIAN_VARIANT ?= bookworm
 GO_VERSION ?= 1.26.0
+NODE_VERSION ?= 22.19.0
 
 BASE_IMAGE ?= localhost/automation-base:$(TAG)
 GO_IMAGE ?= localhost/automation-go:$(TAG)
@@ -41,12 +42,12 @@ build-python: build-base
 	$(BUILD) --build-arg BASE_IMAGE=$(BASE_IMAGE) -f Containerfile.python -t $(PYTHON_IMAGE) .
 
 build-dev:
-	$(BUILD) --build-arg DEBIAN_VARIANT=$(DEBIAN_VARIANT) --build-arg GO_VERSION=$(GO_VERSION) -f Containerfile.dev -t $(DEV_IMAGE) .
+	$(BUILD) --build-arg DEBIAN_VARIANT=$(DEBIAN_VARIANT) --build-arg GO_VERSION=$(GO_VERSION) --build-arg NODE_VERSION=$(NODE_VERSION) -f Containerfile.dev -t $(DEV_IMAGE) .
 
 build-all: build-base build-go build-python build-dev
 
 test-dev:
-	$(RUN) --rm $(DEV_IMAGE) bash -lc "go version && python3 --version && git --version && gcc --version | head -n 1 && podman --version && buildah --version && skopeo --version"
+	$(RUN) --rm $(DEV_IMAGE) bash -lc "go version && python3 --version && node --version && npm --version && git --version && gcc --version | head -n 1 && podman --version && buildah --version && skopeo --version"
 
 shell-dev:
 	$(RUN) --rm -it --privileged --device /dev/fuse -v $(CURDIR):/workspace -w /workspace $(DEV_IMAGE) bash
